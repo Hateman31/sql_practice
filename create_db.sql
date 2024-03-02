@@ -68,3 +68,17 @@ VALUES
     (205, 'Товар5', 30.00, 'Категория1'),
     (206, 'Товар6', 35.00, 'Категория2');
 
+
+CREATE view vw_report as 
+    WITH first as (
+    	SELECT order_id, sum(quantity*price) sum_order  from Order_Items
+    	join Products on Products.product_id = Order_Items.product_id
+    	GROUP by order_id 
+    ),second as (
+    	SELECT customer_id, max(sum_order) max_sum_order from Orders
+    	join first on Orders.order_id = first.order_id
+    	group by customer_id
+    )
+    SELECT customer_name, second.customer_id from second
+    join Customers on Customers.customer_id = second.customer_id
+    order by max_sum_order DESC LIMIT 3;
